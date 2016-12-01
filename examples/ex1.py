@@ -8,7 +8,7 @@ print(__fcs_module_path__)
 
 import numpy as np
 import matplotlib.pyplot as plt
-import fcs
+import fcSpline
 
 n = 1400
 xl = -1
@@ -22,7 +22,7 @@ f_pp = lambda x: -np.sin(x)
 
 y = f(x)
 
-spl = fcs.FCS(xl, xh, y, ord_bound_apprx=2)
+spl = fcSpline.FCS(xl, xh, y, ord_bound_apprx=2)
 from scipy.interpolate import InterpolatedUnivariateSpline
 spl_scipy = InterpolatedUnivariateSpline(x=x, y=y, k=3)
 
@@ -35,7 +35,7 @@ x_low = spl.x_low
 dx = spl.dx
 coef = spl.coef
 
-import fcs.fcs_c as fcs_c
+import fcSpline.fcs_c as fcs_c
 
 fnc = spl.intp
 fnc2 = spl.get_callable()

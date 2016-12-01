@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 
 setup(
     ext_modules = cythonize(Extension("fcs_c",
-                                      ["./fcs/fcs_c.pyx"],
+                                      ["./fcSpline/fcs_c.pyx"],
                                       #libraries=["m"],
                                       extra_compile_args=['-O3'],
                                       #extra_link_args=['-fopenmp'],
