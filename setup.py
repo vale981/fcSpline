@@ -1,13 +1,15 @@
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
+import numpy
 
 
 setup(
-    ext_modules = cythonize(Extension("fcs_c",
+    ext_modules = cythonize(Extension("fcSpline.fcs_c",
                                       ["./fcSpline/fcs_c.pyx"],
-                                      #libraries=["m"],
-                                      extra_compile_args=['-O3'],
-                                      #extra_link_args=['-fopenmp'],
-                                      ))
+                                      #extra_compile_args=['-O3', '-funroll-loops', '-ffinite-math-only', '-fno-trapping-math'],
+                                      extra_compile_args=['-Ofast'],
+                                      #extra_compile_args=['-O2'],
+                                      )),
+    include_dirs=[numpy.get_include()]
 )
