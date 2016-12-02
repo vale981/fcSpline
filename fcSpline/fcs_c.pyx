@@ -1,4 +1,3 @@
-
 cimport cython
 from libc.math cimport fabs
 
