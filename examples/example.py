@@ -31,5 +31,40 @@ def ex1():
     plt.legend()
     plt.show()
 
+def compare_speed():
+    from scipy.interpolate import InterpolatedUnivariateSpline
+    from time import time
+    for n in [15, 150 ,1500, 15000]:
+
+        xl = -10
+        xh = 10
+        f = lambda x: np.sin(x)
+        x = np.linspace(xl, xh, n)
+        y = f(x)
+        t0 = time()
+        spl = fcSpline.FCS(xl, xh, y)
+        t1 = time()
+        spl_scip = InterpolatedUnivariateSpline(x, y, k=3)
+        t2 = time()
+        print("n", n)
+        print("INIT  -  fcs: {:.3e}s, sci {:.3e}s  factor {:.3g}".format(t1-t0, t2-t1, (t2-t1) / (t1-t0) ))
+        t_fcs = t_sci = 0
+
+        for i in range(10000):
+            x = np.random.rand()*(xh-xl) + xl
+            t0 = time()
+            spl(x)
+            t1 = time()
+            spl_scip(x)
+            t2 = time()
+
+            t_fcs += (t1 - t0)
+            t_sci += (t2 - t1)
+
+        print("EVAL  -  fcs: {:.3e}s, sci {:.3e}s  factor {:.3g}".format(t_fcs, t_sci, t_sci / t_fcs))
+
+
+
 if __name__ == "__main__":
-    ex1()
+    # ex1()
+    compare_speed()
