@@ -35,5 +35,7 @@ setup(
                                           #extra_compile_args=['-O3', '-funroll-loops', '-ffinite-math-only', '-fno-trapping-math'],
                                           extra_compile_args=['-Ofast'],
                                           #extra_compile_args=['-O2'],
+                                          include_dirs = [numpy.get_include()],
                                           )),
+
 )
