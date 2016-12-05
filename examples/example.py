@@ -50,6 +50,8 @@ def compare_speed():
         print("INIT  -  fcs: {:.3e}s, sci {:.3e}s  factor {:.3g}".format(t1-t0, t2-t1, (t2-t1) / (t1-t0) ))
         t_fcs = t_sci = 0
 
+        N = 10000
+
         for i in range(10000):
             x = np.random.rand()*(xh-xl) + xl
             t0 = time()
@@ -61,7 +63,7 @@ def compare_speed():
             t_fcs += (t1 - t0)
             t_sci += (t2 - t1)
 
-        print("EVAL  -  fcs: {:.3e}s, sci {:.3e}s  factor {:.3g}".format(t_fcs, t_sci, t_sci / t_fcs))
+        print("EVAL  -  fcs: {:.3e}s, sci {:.3e}s  factor {:.3g}".format(t_fcs/N, t_sci/N, t_sci / t_fcs))
 
 
 
