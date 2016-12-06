@@ -16,7 +16,7 @@ cdef double phi(double t) nogil:
 cpdef double intp(double x, double x_low, double dx, np.ndarray[np.float64_t, ndim=1] coef) except *:
     cdef double tmp = (x - x_low) / dx
     if (tmp < 0) or (tmp > (coef.shape[0]-4)):
-        raise ValueError('x value out of bounds')
+        raise ValueError('x value {} out of bounds'.format(x))
 
     cdef int idxl = <int>(tmp)-1
     cdef int idxh = <int>(tmp+2)
@@ -39,7 +39,7 @@ cpdef np.ndarray[np.float64_t, ndim=1] intp_array(np.ndarray[np.float64_t, ndim=
 cpdef complex intp_cplx(double x, double x_low, double dx, np.ndarray[np.complex128_t, ndim=1] coef) except *:
     cdef double tmp = (x - x_low) / dx
     if (tmp < 0) or (tmp > (coef.shape[0]-4)):
-        raise ValueError('x value out of bounds')
+        raise ValueError('x value {} out of bounds'.format(x))
 
     cdef int idxl = <int>(tmp)-1
     cdef int idxh = <int>(tmp+2)
