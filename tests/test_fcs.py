@@ -106,6 +106,61 @@ def test_spline_property():
         rd = np.abs(f(xf) - yf)/np.abs(f(xf))
         assert np.max(rd) < mrd[i]
 
+
+def test_extr():
+    xl = 0
+    xh = 5
+    n = 5
+    x = np.linspace(xl, xh, n)
+
+
+    y = np.sin(x)
+    spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
+    x_fine, dx = np.linspace(xl-1,xh+1, 100*(n+2), retstep=True)
+    y_fine = spl(x_fine)
+    yp_1 = np.gradient(y_fine, dx)
+    yp_2 = np.gradient(yp_1, dx)
+    yp_3 = np.gradient(yp_2, dx)
+    assert abs(yp_3[50] - yp_3[150]) < 1e-10
+    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
+
+    y = np.sin(x)
+    spl = fcSpline.FCS(xl, xh, y)
+    x_fine, dx = np.linspace(xl - 1, xh + 1, 100 * (n + 2), retstep=True)
+    y_fine = spl(x_fine)
+    yp_1 = np.gradient(y_fine, dx)
+    yp_2 = np.gradient(yp_1, dx)
+    yp_3 = np.gradient(yp_2, dx)
+    assert abs(yp_3[50] - yp_3[150]) < 1e-10
+    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
+
+    y = np.sin(x) + 1j*np.exp(-x)
+    spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
+    x_fine, dx = np.linspace(xl - 1, xh + 1, 100 * (n + 2), retstep=True)
+    y_fine = spl(x_fine)
+    yp_1 = np.gradient(y_fine, dx)
+    yp_2 = np.gradient(yp_1, dx)
+    yp_3 = np.gradient(yp_2, dx)
+    assert abs(yp_3[50] - yp_3[150]) < 1e-10
+    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
+
+
+def test_NPointPoly():
+    x = [0, 1, 2, 3, 4, 5]
+    y = [1, 2, 1, 2, 1, 2]
+
+    poly = fcSpline.NPointPoly(x, y)
+
+    import matplotlib.pyplot as plt
+    plt.plot(x,y, ls='', marker='.')
+
+    xx = np.linspace(x[0]-1, x[-1]+1, 500)
+    yy = [poly(xi) for xi in xx]
+    plt.plot(xx, yy)
+    plt.show()
+
 if __name__ == "__main__":
-    test_calls()
-    test_spline_property()
+    # test_calls()
+    # test_spline_property()
+    # test_NPointPoly()
+    test_extr()

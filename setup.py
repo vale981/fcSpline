@@ -32,9 +32,7 @@ setup(
         platforms=['ALL'],
         ext_modules = cythonize(Extension("fcSpline.fcs_c",
                                           ["./fcSpline/fcs_c.pyx"],
-                                          #extra_compile_args=['-O3', '-funroll-loops', '-ffinite-math-only', '-fno-trapping-math'],
-                                          extra_compile_args=['-Ofast'],
-                                          #extra_compile_args=['-O2'],
+                                          extra_compile_args=['-O3'],
                                           include_dirs = [numpy.get_include()],
                                           )),
 
