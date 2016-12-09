@@ -35,16 +35,16 @@ def _calls_helper(y):
             spl(xh)
             spl((xl+xh)/2)
 
-            catch_exception(spl, (xl - 0.001,), ValueError)
-            catch_exception(spl, (xh + 0.001,), ValueError)
+            spl(xl - 0.001)
+            spl(xh + 0.001)
 
             xfine = np.linspace(xl, xh, 3*(len(y)-1) + 1)
             spl(xfine)
 
             xfine = np.linspace(xl - 0.001, xh, 5)
-            catch_exception(spl, (xfine,), ValueError)
+            spl(xfine)
             xfine = np.linspace(xl, xh+0.001, 5)
-            catch_exception(spl, (xfine,), ValueError)
+            spl(xfine)
 
 def test_calls():
     # real data
@@ -66,7 +66,7 @@ def test_spline_property():
     x = np.linspace(xl, xh, n)
     y = np.sin(x)
 
-    spl = fcSpline.FCS(xl, xh, y)
+    spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
 
     # here we check that the spline evaluates exactly to the data points
     for i, xi in enumerate(x):
@@ -160,7 +160,7 @@ def test_NPointPoly():
     plt.show()
 
 if __name__ == "__main__":
-    # test_calls()
-    # test_spline_property()
-    # test_NPointPoly()
+    test_calls()
+    test_spline_property()
+    test_NPointPoly()
     test_extr()

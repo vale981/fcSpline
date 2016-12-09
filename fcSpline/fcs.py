@@ -146,7 +146,7 @@ class FCS(object):
 
             return res
         else:
-            return self.intp(x, self.x_low, self.x_low, self.dx, self.coef, self.extr_coef)
+            return self.intp(x, self.x_low, self.x_high, self.dx, self.coef, self.extr_coef)
 
 class NPointPoly(object):
     def __init__(self, x, y):
