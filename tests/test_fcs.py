@@ -22,15 +22,15 @@ def _calls_helper(y):
     xh = 5
 
     try:
-        fcSpline.FCS(xl, xh, y, ord_bound_apprx=4)
+        fcSpline.FCS(xl, xh, y, ypp_specs=4)
     except ValueError as e:
         print("OK: caught ValueError", e)
     else:
         assert False
 
-    for ord_bound_apprx in [1,2,3]:
+    for ypp_specs in [None, 1, 2, 3, (10, 20)]:
         for pp in [True, False]:
-            spl = fcSpline.FCS(xl, xh, y, ord_bound_apprx=ord_bound_apprx, use_pure_python=pp)
+            spl = fcSpline.FCS(xl, xh, y, ypp_specs=ypp_specs, use_pure_python=pp)
             spl(xl)
             spl(xh)
             spl((xl+xh)/2)
@@ -100,49 +100,27 @@ def test_spline_property():
         f = lambda x: np.sin(x) + 1j*np.exp(-(x-5)**2/10)
         y = f(x)
 
-        spl = fcSpline.FCS(xl, xh, y)
+        spl = fcSpline.FCS(xl, xh, y, ypp_specs = 3)
         xf = np.linspace(xl, xh, 4*(ni-1)+1)
         yf = spl(xf)
         rd = np.abs(f(xf) - yf)/np.abs(f(xf))
         assert np.max(rd) < mrd[i]
 
-
-def test_extr():
+def test_few_points():
     xl = 0
-    xh = 5
+    xh = 1
     n = 5
     x = np.linspace(xl, xh, n)
+    y = [1,2,1,2,1]
 
-
-    y = np.sin(x)
     spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
-    x_fine, dx = np.linspace(xl-1,xh+1, 100*(n+2), retstep=True)
-    y_fine = spl(x_fine)
-    yp_1 = np.gradient(y_fine, dx)
-    yp_2 = np.gradient(yp_1, dx)
-    yp_3 = np.gradient(yp_2, dx)
-    assert abs(yp_3[50] - yp_3[150]) < 1e-10
-    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
 
-    y = np.sin(x)
-    spl = fcSpline.FCS(xl, xh, y)
-    x_fine, dx = np.linspace(xl - 1, xh + 1, 100 * (n + 2), retstep=True)
-    y_fine = spl(x_fine)
-    yp_1 = np.gradient(y_fine, dx)
-    yp_2 = np.gradient(yp_1, dx)
-    yp_3 = np.gradient(yp_2, dx)
-    assert abs(yp_3[50] - yp_3[150]) < 1e-10
-    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
+    import matplotlib.pyplot as plt
 
-    y = np.sin(x) + 1j*np.exp(-x)
-    spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
-    x_fine, dx = np.linspace(xl - 1, xh + 1, 100 * (n + 2), retstep=True)
-    y_fine = spl(x_fine)
-    yp_1 = np.gradient(y_fine, dx)
-    yp_2 = np.gradient(yp_1, dx)
-    yp_3 = np.gradient(yp_2, dx)
-    assert abs(yp_3[50] - yp_3[150]) < 1e-10
-    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
+    x_fine = np.linspace(xl, xh, 250)
+    plt.plot(x_fine, spl(x_fine))
+    plt.plot(x, y, ls='', marker='o')
+    plt.show()
 
 
 def test_NPointPoly():
@@ -163,4 +141,4 @@ if __name__ == "__main__":
     test_calls()
     test_spline_property()
     test_NPointPoly()
-    test_extr()
+    test_few_points()
