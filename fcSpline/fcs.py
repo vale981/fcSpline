@@ -32,12 +32,15 @@ def _intp(x, x_low, x_high, dx, coef, extr_coef):
     tmp = (x - x_low) / dx
     idxl = int(tmp)-1
     idxh = int(tmp+2)
+    print("idxl", idxl)
+    print("idxh", idxh)
 
     #assert FCS._phi(tmp - (idxl - 1)) == 0
     #assert FCS._phi(tmp - (idxh + 1)) == 0
     
     res = 0        
     for k in range(idxl, idxh+1):
+        print("k", k, "phi", _phi(tmp - k))
         res += coef[k+1]*_phi(tmp - k)
     return res
 

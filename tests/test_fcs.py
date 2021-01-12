@@ -159,8 +159,49 @@ def test_NPointPoly():
     plt.plot(xx, yy)
     plt.show()
 
+def test_speedup():
+    xl = 0
+    xh = 10
+    n = 11
+    x, dx = np.linspace(xl, xh, n, retstep=True)
+    y = np.sin(x)
+
+    spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
+
+    print(spl(0))
+
+    x0 = 2.2
+    print(spl(x0))
+
+    from fcSpline import fcs
+
+    tmp = (x0 - xl) / dx
+    idxl = int(tmp)-1
+    idxh = int(tmp+2)
+
+    res = 0
+    for k in range(idxl, idxh+1):
+        res += spl.coef[k+1]* fcs._phi(tmp - k)
+
+    print(res)
+
+    res = 0
+    if tmp == idxl+1:
+        print("tmp is int")
+        res = spl.coef[idxl+1] + 4 * spl.coef[idxl+2] + spl.coef[idxl+3]
+    else:
+        res =   spl.coef[idxl+1] * (2 - (tmp - idxl)) ** 3 \
+              + spl.coef[idxl+2] * (4 - 6 * (tmp - (idxl + 1)) ** 2 + 3 * (tmp - (idxl + 1)) ** 3) \
+              + spl.coef[idxl+3] * (4 - 6 * (idxl + 2 - tmp) ** 2 + 3 * (idxl + 2 - tmp) ** 3) \
+              + spl.coef[idxl+4] * (2 - (idxl + 3 - tmp)) ** 3
+    print(res)
+
+
+
+
 if __name__ == "__main__":
     test_calls()
     test_spline_property()
     test_NPointPoly()
     test_extr()
+    test_speedup()
