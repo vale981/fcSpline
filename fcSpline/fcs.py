@@ -116,8 +116,6 @@ class FCS(object):
         b[0] = 4*self.ypp_l
         b[-1] = 4*self.ypp_h
 
-        print(b)
-
         return solve_banded((1, 1), ab, b)
 
     def __call__(self, x):
