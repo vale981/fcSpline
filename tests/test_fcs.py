@@ -22,15 +22,15 @@ def _calls_helper(y):
     xh = 5
 
     try:
-        fcSpline.FCS(xl, xh, y, ord_bound_apprx=4)
+        fcSpline.FCS(xl, xh, y, ypp_specs=4)
     except ValueError as e:
         print("OK: caught ValueError", e)
     else:
         assert False
 
-    for ord_bound_apprx in [1,2,3]:
+    for ypp_specs in [None, 1, 2, 3, (10, 20)]:
         for pp in [True, False]:
-            spl = fcSpline.FCS(xl, xh, y, ord_bound_apprx=ord_bound_apprx, use_pure_python=pp)
+            spl = fcSpline.FCS(xl, xh, y, ypp_specs=ypp_specs, use_pure_python=pp)
             spl(xl)
             spl(xh)
             spl((xl+xh)/2)
@@ -100,49 +100,47 @@ def test_spline_property():
         f = lambda x: np.sin(x) + 1j*np.exp(-(x-5)**2/10)
         y = f(x)
 
-        spl = fcSpline.FCS(xl, xh, y)
+        spl = fcSpline.FCS(xl, xh, y, ypp_specs = 3)
         xf = np.linspace(xl, xh, 4*(ni-1)+1)
         yf = spl(xf)
         rd = np.abs(f(xf) - yf)/np.abs(f(xf))
         assert np.max(rd) < mrd[i]
 
 
-def test_extr():
+def test_few_points():
     xl = 0
-    xh = 5
+    xh = 1
     n = 5
     x = np.linspace(xl, xh, n)
+    y = [1,2,1,2,1]
 
-
-    y = np.sin(x)
     spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
-    x_fine, dx = np.linspace(xl-1,xh+1, 100*(n+2), retstep=True)
-    y_fine = spl(x_fine)
-    yp_1 = np.gradient(y_fine, dx)
-    yp_2 = np.gradient(yp_1, dx)
-    yp_3 = np.gradient(yp_2, dx)
-    assert abs(yp_3[50] - yp_3[150]) < 1e-10
-    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
+    for i in range(len(y)):
+        assert spl(x[i]) == y[i]
 
-    y = np.sin(x)
-    spl = fcSpline.FCS(xl, xh, y)
-    x_fine, dx = np.linspace(xl - 1, xh + 1, 100 * (n + 2), retstep=True)
-    y_fine = spl(x_fine)
-    yp_1 = np.gradient(y_fine, dx)
-    yp_2 = np.gradient(yp_1, dx)
-    yp_3 = np.gradient(yp_2, dx)
-    assert abs(yp_3[50] - yp_3[150]) < 1e-10
-    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
 
-    y = np.sin(x) + 1j*np.exp(-x)
-    spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
-    x_fine, dx = np.linspace(xl - 1, xh + 1, 100 * (n + 2), retstep=True)
-    y_fine = spl(x_fine)
-    yp_1 = np.gradient(y_fine, dx)
-    yp_2 = np.gradient(yp_1, dx)
-    yp_3 = np.gradient(yp_2, dx)
-    assert abs(yp_3[50] - yp_3[150]) < 1e-10
-    assert abs(yp_3[-50] - yp_3[-150]) < 1e-10
+def test_cubic_fnc():
+    xl = 0
+    xh = 4
+    n = 5
+    x = np.linspace(xl, xh, n)
+    y = [0, 1, 8, 27, 64]
+    x_fine = np.linspace(xl, xh, 750)
+
+    for use_pure_python in [True, False]:
+        # use analytic value for the endpoint curvature
+        spl = fcSpline.FCS(xl, xh, y, ypp_specs=(0, 24), use_pure_python=use_pure_python)
+        y_spl = spl(x_fine)
+        d = np.abs(x_fine ** 3 - y_spl)
+        assert np.max(d) < 1e-14, "{}".format(np.max(d))
+
+        # use third order finite difference approximation for endpoint curvature
+        spl = fcSpline.FCS(xl, xh, y, ypp_specs=1, use_pure_python=use_pure_python)
+        y_spl = spl(x_fine)
+        d = np.abs(x_fine**3 - y_spl)
+        assert np.max(d) < 1e-14, "{}".format(np.max(d))
+
+
 
 
 def test_NPointPoly():
@@ -159,49 +157,10 @@ def test_NPointPoly():
     plt.plot(xx, yy)
     plt.show()
 
-def test_speedup():
-    xl = 0
-    xh = 10
-    n = 11
-    x, dx = np.linspace(xl, xh, n, retstep=True)
-    y = np.sin(x)
-
-    spl = fcSpline.FCS(xl, xh, y, use_pure_python=True)
-
-    print(spl(0))
-
-    x0 = 2.2
-    print(spl(x0))
-
-    from fcSpline import fcs
-
-    tmp = (x0 - xl) / dx
-    idxl = int(tmp)-1
-    idxh = int(tmp+2)
-
-    res = 0
-    for k in range(idxl, idxh+1):
-        res += spl.coef[k+1]* fcs._phi(tmp - k)
-
-    print(res)
-
-    res = 0
-    if tmp == idxl+1:
-        print("tmp is int")
-        res = spl.coef[idxl+1] + 4 * spl.coef[idxl+2] + spl.coef[idxl+3]
-    else:
-        res =   spl.coef[idxl+1] * (2 - (tmp - idxl)) ** 3 \
-              + spl.coef[idxl+2] * (4 - 6 * (tmp - (idxl + 1)) ** 2 + 3 * (tmp - (idxl + 1)) ** 3) \
-              + spl.coef[idxl+3] * (4 - 6 * (idxl + 2 - tmp) ** 2 + 3 * (idxl + 2 - tmp) ** 3) \
-              + spl.coef[idxl+4] * (2 - (idxl + 3 - tmp)) ** 3
-    print(res)
-
-
-
 
 if __name__ == "__main__":
     test_calls()
     test_spline_property()
-    test_NPointPoly()
-    test_extr()
-    test_speedup()
+    test_cubic_fnc()
+    test_few_points()
+    #test_NPointPoly()
