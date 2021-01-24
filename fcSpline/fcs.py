@@ -91,10 +91,6 @@ class FCS(object):
         self.y = np.hstack((self.y, [0]))
         self.ypp = np.hstack((self.ypp, [0]))
 
-        # used for extrapolation
-        self.yp_l = (self.y[+1] - self.y[+0]) / self.dx + (-1 / 3 * self.ypp[+0] - 1 / 6 * self.ypp[+1]) * self.dx
-        self.yp_h = (self.y[-1] - self.y[-2]) / self.dx + (+1 / 6 * self.ypp[-2] + 1 / 3 * self.ypp[-1]) * self.dx
-
         if has_fcs_s and not use_pure_python:
             if self.dtype == np.complex128:
                 self.intp = fcs_c.intp_cplx
@@ -112,15 +108,15 @@ class FCS(object):
     def _get_ypp(self):
         ab = np.zeros(shape=(3, self.n))
         ab[0, 2:] = 1
-        ab[1, 0] = 1
-        ab[1, 1:-1] = 4
-        ab[1, -1] = 1
+        ab[1, :] = 4
         ab[2, :-2] = 1
 
         b = np.empty(shape=self.n, dtype=self.dtype)
         b[1:-1] = (self.y[2:] - 2 * self.y[1:-1] + self.y[:-2]) * 6 / self.dx ** 2
-        b[0] = self.ypp_l
-        b[-1] = self.ypp_h
+        b[0] = 4*self.ypp_l
+        b[-1] = 4*self.ypp_h
+
+        print(b)
 
         return solve_banded((1, 1), ab, b)
 
