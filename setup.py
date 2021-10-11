@@ -30,6 +30,8 @@ setup(
             'Topic :: Utilities',
             'Intended Audience :: Researcher'],
         platforms=['ALL'],
+        setup_requires=['cython>=0.29'],
+        install_requires=['numpy>=1.20', 'scipy>=1.6'],
         ext_modules = cythonize(Extension("fcSpline.fcs_c",
                                           ["./fcSpline/fcs_c.pyx"],
                                           extra_compile_args=['-O3'],
