@@ -28,6 +28,9 @@
 
          fcSpline = (mach-nix-wrapper.buildPythonPackage {
            src = ./.;
+           pname = "fcSpline";
+           version = "0.1";
+           requirements = builtins.readFile ./requirements.txt;
          });
 
          pythonShell = mach-nix-wrapper.mkPythonShell {
