@@ -21,7 +21,7 @@
            ];
          };
 
-     in flake-utils.lib.eachDefaultSystem (system:
+     in flake-utils.lib.eachSystem ["x86_64-linux"] (system:
        let
          pkgs = nixpkgs.legacyPackages.${system};
          mach-nix-wrapper = import mach-nix { inherit pkgs python pypiDataRev pypiDataSha256; };
@@ -46,5 +46,6 @@
        in {
          devShell = mergeEnvs [ (devShell pkgs) pythonShell ];
          defaultPackage = fcSpline;
+         packages.fcSpline = fcSpline;
        });
 }
