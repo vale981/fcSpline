@@ -34,7 +34,7 @@
          });
 
          pythonShell = mach-nix-wrapper.mkPythonShell {
-           packagesExtra = [fcSpline];
+           requirements = builtins.readFile ./requirements.txt;
          };
 
          mergeEnvs = envs:
