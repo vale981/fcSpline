@@ -14,10 +14,6 @@
       overlay = nixpkgs.lib.composeManyExtensions [
         poetry2nix.overlay
         (final: prev: {
-          blas = prev.blas.override {
-            blasProvider = self.mkl;
-          };
-
           ${name} = (prev.poetry2nix.mkPoetryApplication {
             projectDir = ./.;
             preferWheels = true;
