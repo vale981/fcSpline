@@ -8,9 +8,9 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, poetry2nix }:
-    let
+    (flake-utils.lib.eachDefaultSystem (system:
+      let
       name = "fcSpline";
-    in {
       overlay = nixpkgs.lib.composeManyExtensions [
         poetry2nix.overlay
         (final: prev: {
@@ -20,23 +20,22 @@
 
           ${name} = (prev.poetry2nix.mkPoetryApplication {
             projectDir = ./.;
+            preferWheels = true;
           });
 
           "${name}Shell" = (prev.poetry2nix.mkPoetryEnv {
               projectDir = ./.;
+              preferWheels = true;
 
               editablePackageSources = {
                 ${name} = ./${name};
               };
             });
         })
-
       ];
-    } // (flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
+      pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlay ];
+          overlays = [ overlay ];
           config.allowUnfree = true;
         };
       in

@@ -23,6 +23,7 @@ scipy = "^1.7.3"
 
 [tool.poetry.dev-dependencies]
 Cython = "^0.29.25"
+setuptools = "^59.5.0"
 
 [build-system]
 requires = ["poetry>=0.12", "cython"]
