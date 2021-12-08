@@ -3,47 +3,51 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    mach-nix.url = "github:DavHau/mach-nix";
+    poetry2nix.url = "github:nix-community/poetry2nix";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-   outputs = { self, nixpkgs, flake-utils, mach-nix }:
-     let
-       python = "python39";
-       devShell = pkgs:
-         pkgs.mkShell {
-           buildInputs = [
-             (pkgs.${python}.withPackages
-               (ps: with ps; [ black mypy ]))
-             pkgs.nodePackages.pyright
-           ];
-         };
+  outputs = { self, nixpkgs, flake-utils, poetry2nix }:
+    let
+      name = "fcSpline";
+    in {
+      overlay = nixpkgs.lib.composeManyExtensions [
+        poetry2nix.overlay
+        (final: prev: {
+          blas = prev.blas.override {
+            blasProvider = self.mkl;
+          };
 
-     in flake-utils.lib.eachSystem ["x86_64-linux"] (system:
-       let
-         pkgs = nixpkgs.legacyPackages.${system};
-         mach-nix-wrapper = import mach-nix { inherit pkgs python;  };
+          ${name} = (prev.poetry2nix.mkPoetryApplication {
+            projectDir = ./.;
+          });
 
-         fcSpline = (mach-nix-wrapper.buildPythonPackage {
-           src = ./.;
-           pname = "fcSpline";
-           version = "0.1";
-           requirements = builtins.readFile ./requirements.txt;
-         });
+          "${name}Shell" = (prev.poetry2nix.mkPoetryEnv {
+              projectDir = ./.;
 
-         pythonShell = mach-nix-wrapper.mkPythonShell {
-           requirements = builtins.readFile ./requirements.txt;
-         };
+              editablePackageSources = {
+                ${name} = ./${name};
+              };
+            });
+        })
 
-         mergeEnvs = envs:
-           pkgs.mkShell (builtins.foldl' (a: v: {
-             buildInputs = a.buildInputs ++ v.buildInputs;
-             nativeBuildInputs = a.nativeBuildInputs ++ v.nativeBuildInputs;
-           }) (pkgs.mkShell { }) envs);
+      ];
+    } // (flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ self.overlay ];
+          config.allowUnfree = true;
+        };
+      in
+        rec {
+          packages = {
+            ${name} = pkgs.${name};
+          };
 
-       in {
-         devShell = mergeEnvs [ (devShell pkgs) pythonShell ];
-         defaultPackage = fcSpline;
-         packages.fcSpline = fcSpline;
-       });
+          defaultPackage = packages.${name};
+          devShell = pkgs."${name}Shell".env.overrideAttrs (oldAttrs: {
+            buildInputs = [ pkgs.poetry pkgs.black pkgs.pyright ];
+          });
+        }));
 }
