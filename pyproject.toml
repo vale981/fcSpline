@@ -20,7 +20,7 @@ build = 'build.py'
 python = ">=3.9,<3.11"
 numpy = "^1.20.3"
 scipy = "^1.7.3"
-setuptools = "^65.6.2"
+setuptools = "*"
 
 [tool.poetry.dev-dependencies]
 Cython = "^0.29.25"
