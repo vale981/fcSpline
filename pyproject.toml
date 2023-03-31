@@ -15,6 +15,7 @@ classifiers = [
 ]
 repository = "https://github.com/cimatosa/fcSpline"
 build = 'build.py'
+generate-setup-file = true
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
