@@ -14,7 +14,9 @@ classifiers = [
 "Intended Audience :: Researcher"
 ]
 repository = "https://github.com/cimatosa/fcSpline"
-build = 'build.py'
+
+[tool.poetry.build]
+script = 'build.py'
 generate-setup-file = true
 
 [tool.poetry.dependencies]
